@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flood Alert App</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map { height: 400px; } 
+    </style>
+</head>
+<body>
+    <h1>Flood Alert App</h1>
+
+    {% if user_email %}
+        <p>Logged in as: {{ user_email }}</p>
+        <a href="{{ url_for('logout') }}">Logout</a> 
+        <a href="{{ url_for('add_alert') }}">Add Alert</a>
+        <a href="{{ url_for('add_emergency_contact') }}">Add Emergency Contact</a> 
+    {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('register') }}">Register</a>
+    {% endif %}
+
+    <div id="map"></div>
+
+    {% if alerts %}
+        <h2>Alerts</h2>
+        <ul>
+        {% for alert in alerts %}
+            <li>
+                <b>Location:</b> {{ alert[2] }}<br>
+                <b>Type of Hazard:</b> {{ alert[3] }}<br>
+                <b>Warning Level:</b> {{ alert[4] }}<br>
+                <b>Time:</b> {{ alert[5] }}<br>
+                {% if alert[6] %}
+                    <img src="{{ alert[6] }}" alt="Alert Image/Video" width="200"> 
+                {% endif %}
+                {% if user_email == 'your_admin_email@example.com' %} 
+                    <a href="{{ url_for('delete_alert', alert_id=alert[0]) }}">Delete</a> 
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% if emergency_contacts %}
+        <h2>Emergency Contacts</h2>
+        <ul>
+        {% for contact in emergency_contacts %}
+            <li>
+                <b>Name:</b> {{ contact[1] }}<br>
+                <b>Phone Number:</b> {{ contact[2] }}<br>
+                {% if contact[3] %} 
+                    <b>Email:</b> {{ contact[3] }}<br>
+                {% endif %}
+            </li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+
+    <script>
+        var map = L.map('map').setView([-30.0346, -51.2177], 13); 
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+        }).addTo(map);
+
+        fetch('/get_alerts')
+            .then(response => response.json())
+            .then(alerts => {
+                alerts.forEach(alert => {
+                    if (alert.latitude && alert.longitude) {
+                        L.marker([alert.latitude, alert.longitude]).addTo(map)
+                            .bindPopup(`
+                                <b>${alert.type_of_hazard}</b><br>
+                                <b>Location:</b> ${alert.location}<br>
+                                <b>Warning Level:</b> ${alert.warning_level}<br>
+                                <b>Time:</b> ${alert.time}<br>
+                                ${alert.photo_video_url ? `<img src="${alert.photo_video_url}" alt="Alert Image/Video" width="200">` : ''} 
+                            `); 
+                    }
+                });
+            });
+    </script>
+</body>
+</html>

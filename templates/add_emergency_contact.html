@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Emergency Contact</title>
+</head>
+<body>
+    <h1>Add Emergency Contact</h1>
+
+    <form method="POST" action="/add_emergency_contact">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+
+        <label for="phone_number">Phone Number:</label>
+        <input type="text" id="phone_number" name="phone_number" required><br><br>
+
+        <label for="email">Email (optional):</label>
+        <input type="email" id="email" name="email"><br><br>
+
+        <input type="submit" value="Add Contact">
+    </form>
+</body>
+</html>
